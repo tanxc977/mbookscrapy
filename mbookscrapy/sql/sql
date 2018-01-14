@@ -1,0 +1,29 @@
+mysql -uroot -p
+admin
+
+
+CREATE DATABASE IF NOT EXISTS mebook DEFAULT CHARSET utf8 COLLATE utf8_general_ci;
+
+create user bookexec@'%' IDENTIFIED BY 'bookexec';
+
+GRANT ALL PRIVILEGES ON mebook.* to bookexec@'%' IDENTIFIED BY 'bookexec';
+
+使用bookexec登录数据库 建表
+
+DROP TABLE IF EXISTS BOOK;
+
+CREATE TABLE book (
+seqno bigint NOT NULL AUTO_INCREMENT ,
+catagory_tag  varchar(30),
+update_date varchar(20),
+book_url  varchar(200),
+book_name  varchar(200),
+book_desc  varchar(3000),
+enter_date  datetime NOT NULL DEFAULT NOW(),
+down_url  varchar(300),
+down_pwd  varchar(100),
+image_path  varchar(100),
+file_path  varchar(1000),
+download_flag char(1) NOT NULL DEFAULT 'N',
+PRIMARY KEY (seqno)
+)ENGINE=InnoDB CHARSET='utf8';
