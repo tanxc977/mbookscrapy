@@ -111,7 +111,12 @@ class MbookSider(CrawlSpider):
 
                 url_download = response.xpath('//a[@class="downbtn"]/@href').extract()[0]
 
-            metadata['image_url'] = response.xpath('//div[@id="content"]/p/img/@src').extract()[0]
+            if len(response.xpath('//div[@id="content"]/p/img/@src').extract()) != 0:
+                metadata['image_url'] = response.xpath('//div[@id="content"]/p/img/@src').extract()[0]
+            elif len(response.xpath('//div[@id="content"]/h2/img/@src').extract()) != 0:
+                metadata['image_url'] = response.xpath('//div[@id="content"]/h2/img/@src').extract()[0]
+            else:
+                metadata['image_url'] = ''
             metadata['title'] = title
             metadata['introduction'] = introduction
             metadata['updatedate'] = update_date
