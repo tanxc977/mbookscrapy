@@ -40,8 +40,8 @@ class MbookSider(CrawlSpider):
     rules = (
 
         # 定义 follows= True 才会不断探索新URL
-        # Rule(LinkExtractor(allow='http://mebook.cc/([\d]+).html'), callback='parse_detail'),
         Rule(LinkExtractor(allow='http://mebook.cc/page/([\d]+)'), callback='parseItem', follow=True),
+
     )
 
     # 用集合过滤爬取url
@@ -66,7 +66,7 @@ class MbookSider(CrawlSpider):
 
     # 获取第一个URL
     def start_requests(self):
-        yield Request(self.start_urls[0])
+        yield Request(self.start_urls[0], callback=self.parseItem)
 
     # 解析每一页：类似于 http://mebook.cc/page/2
     # 将meta信息通过response传递到下一层处理
