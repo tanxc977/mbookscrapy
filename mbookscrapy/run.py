@@ -1,6 +1,6 @@
 from scrapy import cmdline
 
-name = 'mbook7'
+name = 'mbook'
 cmd = 'scrapy crawl %s' % name
 
 cmdline.execute(cmd.split())
