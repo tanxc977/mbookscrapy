@@ -79,12 +79,15 @@ class MbookscrapyDatabasePipeline(object):
         file_name = '%s/%s' % (self.dir_path_pic, file_name_al)
         file_name_pic = file_name
 
-        with open(file_name, 'wb') as handle:
-            response = requests.get(pic_url, stream=True)
-            for block in response.iter_content(1024):
-                if not block:
-                    break
-                handle.write(block)
+        if len(pic_url.strip()) != 0:
+            with open(file_name, 'wb') as handle:
+                response = requests.get(pic_url, stream=True)
+                for block in response.iter_content(1024):
+                    if not block:
+                        break
+                    handle.write(block)
+        else:
+            file_name_pic = ''
 
         item['image_path'] = file_name_pic
         line = json.dumps(dict(item), ensure_ascii=False) + "\n"
