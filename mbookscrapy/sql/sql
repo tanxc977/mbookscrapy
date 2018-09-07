@@ -18,12 +18,20 @@ catagory_tag  varchar(30),
 update_date varchar(20),
 book_url  varchar(200),
 book_name  varchar(200),
-book_desc  varchar(3000),
+book_desc  varchar(5000),
 enter_date  datetime NOT NULL DEFAULT NOW(),
 down_url  varchar(300),
 down_pwd  varchar(100),
 image_path  varchar(100),
 file_path  varchar(1000),
 download_flag char(1) NOT NULL DEFAULT 'N',
+PRIMARY KEY (seqno)
+)ENGINE=InnoDB CHARSET='utf8';
+
+
+drop  table if EXISTS book_block_url;
+CREATE TABLE book_block_url (
+seqno bigint NOT NULL AUTO_INCREMENT ,
+book_url  varchar(300),
 PRIMARY KEY (seqno)
 )ENGINE=InnoDB CHARSET='utf8';

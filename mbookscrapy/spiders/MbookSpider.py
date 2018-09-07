@@ -9,6 +9,7 @@ import re
 import json
 import pymysql
 from mbookscrapy import settings
+
 # 用XPATH解析所有RESPONSE
 '''
 本程序用来爬取小书屋所有的书籍，目前仅爬取在天翼云盘有存储的电子书
@@ -29,6 +30,8 @@ class MbookSider(CrawlSpider):
     url_encode = "https://cloud.189.cn/v2/listShareDir.action?shareId=%s&accessCode=%s" \
                  "&verifyCode=%s&orderBy=1&order=ASC&pageNum=1&pageSize=60"
     init_sql = "select book_url from book"
+    block_url = "select book_url from book_block_url"
+    block_sql_insert = "insert into book_block_url(book_url) values('%s') "
     allowed_domains = [
         "mebook.cc",
         "cloud.189.cn",
@@ -42,6 +45,8 @@ class MbookSider(CrawlSpider):
         # 定义 follow= True 才会不断探索新URL
         Rule(LinkExtractor(allow='http://mebook.cc/page/([\d]+)'), callback='parseItem', follow=True),
         Rule(LinkExtractor(allow='http://mebook.cc/'), callback='parseItem'),
+        # Rule(LinkExtractor(allow='http://mebook.cc/page/([\d]+)'), callback='parseItem'),
+
 
     )
 
@@ -62,8 +67,17 @@ class MbookSider(CrawlSpider):
         self.cur.execute(self.init_sql)
         for url in self.cur.fetchall():
             self.url_set.add(url[0])
+
+        self.cur.execute(self.block_url)
+
+        for url in self.cur.fetchall():
+            self.url_set.add(url[0])
+
         self.logger.info('url_set is %s' % str(self.url_set))
         self.logger.info('url_set len %s' % len(self.url_set))
+
+    def parse_start_url(self, response):
+        self.parseItem(response)
 
     # 获取第一个URL
     # def start_requests(self):
@@ -85,6 +99,7 @@ class MbookSider(CrawlSpider):
                 self.url_set.add(url)
                 yield Request(url, callback=self.parse_detail, meta=meta)
 
+
     # 解析电子书详细说明页：类似于 http://mebook.cc/20183.html
     # 如果下载地址不为空，将meta信息通过response 带到下一层
     # 此层通过xpath解析HTML
@@ -94,11 +109,20 @@ class MbookSider(CrawlSpider):
             update_date = ''
             metadata = response.meta
 
+            self.logger.info("explain url:  %s" % response.url)
+
+            if len(response.url) > 0:
+                try:
+                    sql = self.block_sql_insert % response.url
+                    self.cur.execute(sql)
+                    self.conn.commit()
+                except Exception as e:
+                    self.logger.info("block_url insert error : " + str(e))
+
             soup = BeautifulSoup(response.body)
             title = soup.select('#primary h1')[0].string
 
-            # XPATH方式提取简介
-            for span_text in response.xpath('//div[@id="content"]/h2/following-sibling::*/span/text()').extract():
+            for span_text in response.xpath('//div[@id="content"]/h2/following::*/span[contains(@style,"font-family")]/text()').extract():
                 introduction = introduction + span_text
 
             # XPATH 方式提取URL updatedate
